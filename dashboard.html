@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MJ Legacy — Dashboard Analytique</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,600;1,300&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+
+<body>
+
+    <div class="topbar">
+        <div class="topbar-logo">MJ LEGACY — Analyse</div>
+        <div class="topbar-right">
+            <button class="refresh-btn" onclick="loadStats()">↻ Actualiser</button>
+            <a href="/" class="nav-link">+ Ajouter une réponse</a>
+        </div>
+    </div>
+
+    <div class="page">
+
+        <!-- KPI STRIP -->
+        <div class="kpi-strip" id="kpi-strip">
+            <div class="kpi">
+                <div class="kpi-val" id="k-total">—</div>
+                <div class="kpi-label">Réponses totales</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-val" id="k-mean">—</div>
+                <div class="kpi-label">Note moyenne / 10</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-val" id="k-median">—</div>
+                <div class="kpi-label">Note médiane</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-val" id="k-mode">—</div>
+                <div class="kpi-label">Note la + fréquente</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-val" id="k-listens">—</div>
+                <div class="kpi-label">Écoutes/sem (moy.)</div>
+            </div>
+        </div>
+
+        <div id="main-content">
+            <div class="loading">⏳ Chargement des données…</div>
+        </div>
+    </div>
+
+    <script>
+        const CHART_DEFAULTS = {
+            color: '#f0ede8',
+            plugins: { legend: { display: false } },
+        };
+        const GOLD = '#d4a843';
+        const GOLD2 = '#f0c96a';
+        const COLORS = ['#d4a843', '#e8b84b', '#c2943b', '#a87c30', '#8a6520', '#6e5019', '#523c13', '#3a2a0d', '#f0c96a', '#b87333'];
+
+        function barChart(ctx, labels, data, color = GOLD) {
+            return new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{ data, backgroundColor: labels.map((_, i) => COLORS[i % COLORS.length]), borderRadius: 5, borderSkipped: false }]
+                },
+                options: {
+                    ...CHART_DEFAULTS,
+                    indexAxis: 'y',
+                    scales: {
+                        x: { ticks: { color: '#666', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+                        y: { ticks: { color: '#aaa', font: { size: 11 } }, grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function doughnutChart(ctx, labels, data) {
+            return new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels,
+                    datasets: [{ data, backgroundColor: COLORS, borderColor: '#131313', borderWidth: 3, hoverOffset: 6 }]
+                },
+                options: {
+                    ...CHART_DEFAULTS,
+                    cutout: '65%',
+                    plugins: {
+                        legend: { display: true, position: 'bottom', labels: { color: '#888', font: { size: 10 }, boxWidth: 10, padding: 12 } }
+                    }
+                }
+            });
+        }
+
+        function lineChart(ctx, labels, data) {
+            return new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        data, backgroundColor: data.map(v => `rgba(212,168,67,${0.3 + v / 30})`),
+                        borderColor: GOLD, borderWidth: 1.5, borderRadius: 4, borderSkipped: false
+                    }]
+                },
+                options: {
+                    ...CHART_DEFAULTS,
+                    scales: {
+                        x: { ticks: { color: '#666', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+                        y: { ticks: { color: '#666', font: { size: 10 }, stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.04)' }, beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        async function loadStats() {
+            const res = await fetch('/api/stats');
+            const d = await res.json();
+
+            // KPIs
+            document.getElementById('k-total').textContent = d.count || 0;
+            document.getElementById('k-mean').textContent = d.rating_mean ?? '—';
+            document.getElementById('k-median').textContent = d.rating_median ?? '—';
+            document.getElementById('k-mode').textContent = d.rating_mode ?? '—';
+            document.getElementById('k-listens').textContent = d.listens_mean ?? '—';
+
+            if (!d.count) {
+                document.getElementById('main-content').innerHTML = `
+      <div class="empty"><div>🎵</div>Aucune donnée pour l'instant.<br>Soyez le premier à répondre !</div>`;
+                return;
+            }
+
+            const html = `
+  <div class="grid2">
+    <div class="chart-card">
+      <div class="card-title">Chansons préférées</div>
+      <canvas id="c-songs"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="card-title">Ère / Album préféré</div>
+      <canvas id="c-eras"></canvas>
+    </div>
+  </div>
+  <div class="grid3">
+    <div class="chart-card">
+      <div class="card-title">Émotions ressenties</div>
+      <canvas id="c-emotions"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="card-title">Tranches d'âge</div>
+      <canvas id="c-ages"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="card-title">Distribution des notes</div>
+      <canvas id="c-hist"></canvas>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="chart-card">
+      <div class="card-title">Note moyenne par chanson</div>
+      <div id="avg-song-list"></div>
+    </div>
+    <div class="chart-card">
+      <div class="card-title">Top pays représentés</div>
+      <div id="countries-list"></div>
+    </div>
+  </div>
+  <div class="chart-card" style="margin-bottom:2rem">
+    <div class="card-title">5 dernières réponses</div>
+    <table class="recent-table">
+      <thead><tr>
+        <th>Pseudo</th><th>Chanson</th><th>Note</th><th>Pays</th><th>Date</th>
+      </tr></thead>
+      <tbody id="recent-tbody"></tbody>
+    </table>
+  </div>`;
+
+            document.getElementById('main-content').innerHTML = html;
+
+            // Songs
+            barChart(document.getElementById('c-songs'),
+                d.songs.map(x => x.label), d.songs.map(x => x.count));
+
+            // Eras
+            barChart(document.getElementById('c-eras'),
+                d.eras.map(x => x.label), d.eras.map(x => x.count));
+
+            // Emotions
+            doughnutChart(document.getElementById('c-emotions'),
+                d.emotions.map(x => x.label), d.emotions.map(x => x.count));
+
+            // Ages
+            doughnutChart(document.getElementById('c-ages'),
+                d.age_groups.map(x => x.label), d.age_groups.map(x => x.count));
+
+            // Histogram
+            lineChart(document.getElementById('c-hist'),
+                d.rating_dist.map(x => x.note), d.rating_dist.map(x => x.count));
+
+            // Avg by song
+            const avgEl = document.getElementById('avg-song-list');
+            const maxAvg = Math.max(...d.avg_by_song.map(x => x.avg));
+            avgEl.innerHTML = d.avg_by_song.map(s => `
+    <div class="rank-item">
+      <div class="rank-label">${s.song}</div>
+      <div class="rank-bar-wrap"><div class="rank-bar" style="width:${(s.avg / 10 * 100).toFixed(1)}%"></div></div>
+      <div class="rank-pct">${s.avg} / 10</div>
+    </div>`).join('');
+
+            // Countries
+            const cEl = document.getElementById('countries-list');
+            const maxC = d.countries[0]?.count || 1;
+            cEl.innerHTML = d.countries.map(c => `
+    <div class="rank-item">
+      <div class="rank-label">${c.label}</div>
+      <div class="rank-bar-wrap"><div class="rank-bar" style="width:${(c.count / maxC * 100).toFixed(1)}%"></div></div>
+      <div class="rank-pct">${c.pct}%</div>
+    </div>`).join('');
+
+            // Recent
+            const tbody = document.getElementById('recent-tbody');
+            tbody.innerHTML = (d.last_5 || []).map(r => `
+    <tr>
+      <td>${r.pseudo}</td>
+      <td>${r.song}</td>
+      <td><span class="rating-badge">${r.rating}</span></td>
+      <td>${r.country}</td>
+      <td style="color:var(--muted)">${r.at}</td>
+    </tr>`).join('');
+        }
+
+        loadStats();
+        setInterval(loadStats, 30000); // auto-refresh every 30s
+    </script>
+</body>
+
+</html>

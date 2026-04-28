@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MJ Legacy — Sondage Musical</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,600;1,300&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="index.js" defer></script>
+</head>
+
+<body>
+
+    <a href="dashboard.html" class="nav-link">Voir les résultats</a>
+
+    <div class="particles" id="particles"></div>
+
+    <div class="hero">
+        <p class="hero-eyebrow">Collecte de données musicales</p>
+        <h1>MICHAEL<br>JACKSON</h1>
+        <p class="hero-sub">Quelle est votre relation avec le King of Pop ?</p>
+        <div class="counter-pill">
+            <span id="hero-count">—</span> fans ont déjà répondu
+        </div>
+    </div>
+
+    <div class="form-wrap">
+        <div class="form-card">
+
+            <div class="section-label">01 — Votre profil</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Pseudo / Prénom</label>
+                    <input type="text" id="pseudo" placeholder="Cutedev" maxlength="80">
+                </div>
+                <div class="form-group">
+                    <label>Tranche d'âge</label>
+                    <select id="age_group">
+                        <option value="">— Choisir —</option>
+                        <option value="18">Moins de 18 ans</option>
+                        <option value="18-25">18 – 25 ans</option>
+                        <option value="26-35">26 – 35 ans</option>
+                        <option value="36-50">36 – 50 ans</option>
+                        <option value="50+">Plus de 50 ans</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-full">
+                <div class="form-group">
+                    <label>Pays</label>
+                    <input type="text" id="country" placeholder="Cameroun" maxlength="80">
+                </div>
+            </div>
+
+            <div class="section-label" style="margin-top:1.5rem">02 — Vos préférences</div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Chanson préférée</label>
+                    <select id="fav_song">
+                        <option value="">— Choisir —</option>
+                        <option>Thriller</option>
+                        <option>Billie Jean</option>
+                        <option>Beat It</option>
+                        <option>Smooth Criminal</option>
+                        <option>Man in the Mirror</option>
+                        <option>Black or White</option>
+                        <option>Don't Stop 'Til You Get Enough</option>
+                        <option>Rock with You</option>
+                        <option>Human Nature</option>
+                        <option>Earth Song</option>
+                        <option>You Are Not Alone</option>
+                        <option>Bad</option>
+                        <option>Heal the World</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Ère / Album préféré</label>
+                    <select id="fav_era">
+                        <option value="">— Choisir —</option>
+                        <option value="Jackson 5">Jackson 5 (1969–1975)</option>
+                        <option value="Off the Wall">Off the Wall (1979)</option>
+                        <option value="Thriller">Thriller (1982)</option>
+                        <option value="Bad">Bad (1987)</option>
+                        <option value="Dangerous">Dangerous (1991)</option>
+                        <option value="HIStory">HIStory (1995)</option>
+                        <option value="Invincible">Invincible (2001)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-full" style="margin-top:1rem">
+                <div class="form-group">
+                    <label>Note globale (1 → 10)</label>
+                    <div class="rating-wrap">
+                        <div class="stars" id="stars">
+                            <span class="star" data-v="1">⭐</span>
+                            <span class="star" data-v="2">⭐</span>
+                            <span class="star" data-v="3">⭐</span>
+                            <span class="star" data-v="4">⭐</span>
+                            <span class="star" data-v="5">⭐</span>
+                            <span class="star" data-v="6">⭐</span>
+                            <span class="star" data-v="7">⭐</span>
+                            <span class="star" data-v="8">⭐</span>
+                            <span class="star" data-v="9">⭐</span>
+                            <span class="star" data-v="10">⭐</span>
+                        </div>
+                        <div class="rating-val" id="rating-val">—</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-full" style="margin-top:1rem">
+                <div class="form-group">
+                    <label>Écoutes par semaine (nombre approximatif)</label>
+                    <input type="number" id="listens_week" placeholder="ex: 5" min="0" max="9999">
+                </div>
+            </div>
+
+            <div class="section-label" style="margin-top:1.5rem">03 — Ce que MJ vous fait ressentir</div>
+
+            <div class="emotion-grid" id="emotions">
+                <div class="emotion-pill" data-v="Joy">Joie</div>
+                <div class="emotion-pill" data-v="Nostalgia">Nostalgie</div>
+                <div class="emotion-pill" data-v="Energy">Énergie</div>
+                <div class="emotion-pill" data-v="Sadness">Mélancolie</div>
+                <div class="emotion-pill" data-v="Inspiration">Inspiration</div>
+                <div class="emotion-pill" data-v="Pride">Fierté</div>
+                <div class="emotion-pill" data-v="Dance">Envie de danser</div>
+            </div>
+
+            <div class="error-msg" id="error-msg">⚠ Veuillez remplir tous les champs.</div>
+
+            <button class="btn-submit" id="btn-submit" onclick="submitForm()">
+                &nbsp; Soumettre ma réponse
+            </button>
+
+        </div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="success-overlay" id="success">
+        <div class="success-icon">🕺</div>
+        <div class="success-title">Beat It !</div>
+        <p class="success-sub">Votre réponse a bien été enregistrée. Merci !</p>
+        <a href="/dashboard" class="btn-dash">Voir le dashboard →</a>
+        <a href="/" class="btn-outline" onclick="resetForm(event)">Soumettre une autre réponse</a>
+    </div>
+</body>
+
+</html>
