@@ -61,6 +61,7 @@ inf232/
 ├── dashboard.html  # Page du tableau de bord
 ├── dashboard.css   # Styles du tableau de bord
 ├── vercel.json     # Configuration de déploiement sur Vercel
+├── requirements.txt # Dépendances Python pour Vercel
 └── instance/
     └── mjsurvey.db # Base de données SQLite (générée automatiquement)
 
