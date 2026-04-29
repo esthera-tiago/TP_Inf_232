@@ -119,5 +119,8 @@ def stats():
 def count():
     return jsonify({'count': Response.query.count()})
 
+with app.app_context():
+    db.create_all()
+
 if __name__ == '__main__':
     app.run(debug=True)
