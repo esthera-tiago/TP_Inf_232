@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -8,7 +10,7 @@ from collections import Counter
 app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/mjsurvey.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
